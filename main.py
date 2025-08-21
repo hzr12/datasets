@@ -1,8 +1,9 @@
 import requests
 import datetime
 import pandas as pd
+import time
 
-trainNumbers = ['K302', 'G1', 'G10']
+trainNumbers = ['D3813', 'G3726', 'G8464']
 result_lists = []
 
 headers = {
@@ -75,5 +76,6 @@ for trainNumber in trainNumbers:
     num_json_data=len(time_json_data['data'])
     formatted_date = format_date(date)
     get_result_data(num_json_data, time_json_data)
+    time.sleep(1)
 df = pd.DataFrame(result_lists)
 df.to_csv(f'datasets/{date}.csv', index=False)

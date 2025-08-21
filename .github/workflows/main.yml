@@ -1,52 +1,57 @@
 name: Daily CSV Export (UTC+8 15:00)
 on:
   schedule:
-    - cron: '0 7 * * *'  # UTC 07:00 = UTC+8 15:00 [4,6](@ref)
-  workflow_dispatch:      # 支持手动触发
+    - cron: '0 7 * * *'  # UTC 07:00 = UTC+8 15:00
+  workflow_dispatch:    # 支持手动触发
 
 jobs:
   generate-csv:
     runs-on: ubuntu-latest
     permissions:
-      contents: write    # 必须赋予仓库写入权限 [4](@ref)
+      contents: write  # 必须赋予写入权限
 
     steps:
       # 1. 检出代码
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. 设置 Python 环境
+      # 2. 设置Python环境并缓存整个环境
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+          cache: 'pip'  # 自动缓存pip依赖
 
-      # 3. 配置 pip 依赖缓存
-      - name: Cache pip dependencies
+      # 3. 缓存整个Python环境（包括site-packages）
+      - name: Cache Python env
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ~/.cache/pip
+            /opt/hostedtoolcache/Python/3.11*/x64/lib/python3.11/site-packages
+          key: ${{ runner.os }}-python-3.11-${{ hashFiles('requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-python-3.11-
 
       # 4. 安装依赖
       - name: Install dependencies
-        run: pip install -r requirements.txt  # 依赖需写在 requirements.txt 中
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # 5. 创建数据集目录
+      # 5. 创建datasets目录
       - name: Create datasets folder
-        run: mkdir -p datasets  # 确保目录存在
+        run: mkdir -p datasets
 
-      # 6. 运行脚本（输出到 datasets/YYYYMMDD.csv）
+      # 6. 运行脚本（输出到datasets/YYYYMMDD.csv）
       - name: Run main.py
-        run: python main.py  # 脚本需生成 datasets/20250821.csv 格式文件
+        run: python main.py
 
-      # 7. 强制提交所有变更（无论文件是否修改）
-      - name: Force Commit CSV
+      # 7. 强制提交所有变更
+      - name: Force Commit to datasets/
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-Update: $(date %Y%m%d).csv"
-          skip_dirty_check: true  # 核心：跳过变更检查 [10](@ref)
+          commit_message: "Auto-Update: $(date -u +'%Y%m%d').csv"
+          skip_dirty_check: true  # 强制提交
           branch: main
-          file_pattern: 'datasets/*'  # 仅提交 datasets 目录 [4](@ref)
+          file_pattern: 'datasets/*'

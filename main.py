@@ -57,7 +57,7 @@ def get_data_json(url, headers, data):
     response = requests.post(url=url, headers=headers,data=data)
     json_data = response.json()
     return json_data
-date = get_raw_date(1)
+date = get_raw_date(2)
 for trainNumber in trainNumbers:
     get_data = {
         'date': date,

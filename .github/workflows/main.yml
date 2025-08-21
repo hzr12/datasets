@@ -1,0 +1,43 @@
+name: Daily CSV Export (UTC+8 15:00)
+on:
+  schedule:
+    - cron: '0 7 * * *'  # UTC 7:00 = UTC+8 15:00
+  workflow_dispatch:      # 支持手动触发
+
+jobs:
+  generate-csv:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    # 必须赋予写入权限
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 设置 Python 环境
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      # 3. 安装依赖（可选）
+      - name: Install dependencies
+        run: pip install -r requirements.txt  # 若需第三方库
+
+      # 4. 创建 datasets 目录（确保路径存在）
+      - name: Create datasets directory
+        run: mkdir -p datasets
+
+      # 5. 运行脚本（输出到 datasets/YYYYMMDD.csv）
+      - name: Run main.py
+        run: python main.py  # 脚本需输出到 datasets/ 目录
+
+      # 6. 强制提交所有变更（无论文件是否有修改）
+      - name: Force Commit to datasets/
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-Update CSV: $(date -u +'%Y%m%d')"
+          skip_dirty_check: true  # 核心配置：跳过变更检查
+          branch: main
+          file_pattern: 'datasets/*'  # 仅提交 datasets 目录下的文件

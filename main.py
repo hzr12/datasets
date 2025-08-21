@@ -1,11 +1,9 @@
 import requests
 import datetime
 import pandas as pd
-import time
 
-trainNumbers = ['D3813', 'G3726', 'G8464', 'G1', 'D1']
+trainNumbers = ['D3813', 'G3726', 'G1', 'D1']
 result_lists = []
-
 headers = {
     'Host': 'rail.moefactory.com',
     'Origin': 'https://rail.moefactory.com',
@@ -16,9 +14,7 @@ url = 'https://rail.moefactory.com/api/trainNumber/query'
 time_url = 'https://rail.moefactory.com/api/trainDetails/queryTrainDelayDetails'
 def get_raw_date(i=1):
     raw_date = datetime.date.today().strftime("%Y%m%d")
-    raw_date = int(raw_date)
-    raw_date = raw_date - i
-    return raw_date
+    return int(raw_date) - i
 def format_date(date):
     date_str = str(date)
     date_obj = datetime.datetime.strptime(date_str, "%Y%m%d") #将YYYYMMDD格式转换为YYYY-MM-DD
@@ -76,6 +72,6 @@ for trainNumber in trainNumbers:
     num_json_data=len(time_json_data['data'])
     formatted_date = format_date(date)
     get_result_data(num_json_data, time_json_data)
-    time.sleep(1)
+    time.sleep(0.5)
 df = pd.DataFrame(result_lists)
 df.to_csv(f'datasets/{date}.csv', index=False)

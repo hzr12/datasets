@@ -1,5 +1,6 @@
 import requests
 import datetime
+import time
 import pandas as pd
 
 trainNumbers = ['D3813', 'G3726', 'G1', 'D1']

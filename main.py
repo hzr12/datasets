@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 import time
 
-trainNumbers = ['D3813', 'G3726', 'G8464', 'G568', 'C7007', 'D1', 'G1', 'G10']
+trainNumbers = ['D3813', 'G3726', 'G8464', 'G1', 'D1']
 result_lists = []
 
 headers = {

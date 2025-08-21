@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 import time
 
-trainNumbers = ['D3813', 'G3726', 'G8464']
+trainNumbers = ['D3813', 'G3726', 'G8464', 'G568', 'C7007', 'D1', 'G1', 'G10']
 result_lists = []
 
 headers = {
@@ -57,7 +57,7 @@ def get_data_json(url, headers, data):
     response = requests.post(url=url, headers=headers,data=data)
     json_data = response.json()
     return json_data
-date = get_raw_date(2)
+date = get_raw_date()
 for trainNumber in trainNumbers:
     get_data = {
         'date': date,

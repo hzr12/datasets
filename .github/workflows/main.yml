@@ -46,7 +46,7 @@ jobs:
       - name: Force Commit CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-Update: $(date -u +'%Y%m%d').csv"
+          commit_message: "Auto-Update: $(date %Y%m%d).csv"
           skip_dirty_check: true  # 核心：跳过变更检查 [10](@ref)
           branch: main
           file_pattern: 'datasets/*'  # 仅提交 datasets 目录 [4](@ref)

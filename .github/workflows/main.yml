@@ -1,14 +1,14 @@
 name: Daily CSV Export (UTC+8 15:00)
 on:
   schedule:
-    - cron: '0 7 * * *'  # UTC 7:00 = UTC+8 15:00
+    - cron: '0 7 * * *'  # UTC 07:00 = UTC+8 15:00 [4,6](@ref)
   workflow_dispatch:      # 支持手动触发
 
 jobs:
   generate-csv:
     runs-on: ubuntu-latest
     permissions:
-      contents: write    # 必须赋予写入权限
+      contents: write    # 必须赋予仓库写入权限 [4](@ref)
 
     steps:
       # 1. 检出代码
@@ -16,28 +16,37 @@ jobs:
         uses: actions/checkout@v4
 
       # 2. 设置 Python 环境
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
-      # 3. 安装依赖（可选）
+      # 3. 配置 pip 依赖缓存
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip- [1,5](@ref)
+
+      # 4. 安装依赖
       - name: Install dependencies
-        run: pip install -r requirements.txt  # 若需第三方库
+        run: pip install -r requirements.txt  # 依赖需写在 requirements.txt 中
 
-      # 4. 创建 datasets 目录（确保路径存在）
-      - name: Create datasets directory
-        run: mkdir -p datasets
+      # 5. 创建数据集目录
+      - name: Create datasets folder
+        run: mkdir -p datasets  # 确保目录存在
 
-      # 5. 运行脚本（输出到 datasets/YYYYMMDD.csv）
+      # 6. 运行脚本（输出到 datasets/YYYYMMDD.csv）
       - name: Run main.py
-        run: python main.py  # 脚本需输出到 datasets/ 目录
+        run: python main.py  # 脚本需生成 datasets/20250821.csv 格式文件
 
-      # 6. 强制提交所有变更（无论文件是否有修改）
-      - name: Force Commit to datasets/
+      # 7. 强制提交所有变更（无论文件是否修改）
+      - name: Force Commit CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-Update CSV: $(date -u +'%Y%m%d')"
-          skip_dirty_check: true  # 核心配置：跳过变更检查
+          commit_message: "Auto-Update: $(date -u +'%Y%m%d').csv"
+          skip_dirty_check: true  # 核心：跳过变更检查 [10](@ref)
           branch: main
-          file_pattern: 'datasets/*'  # 仅提交 datasets 目录下的文件
+          file_pattern: 'datasets/*'  # 仅提交 datasets 目录 [4](@ref)

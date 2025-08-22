@@ -73,4 +73,4 @@ for trainNumber in trainNumbers:
     formatted_date = format_date(date)
     get_result_data(num_json_data, time_json_data)
 df = pd.DataFrame(result_lists)
-df.to_csv(f'datasets/{date}_{trainNumbers[0]}.csv', index=False)
+df.to_csv(f'dataset/{date}_{trainNumbers[0]}.csv', index=False)

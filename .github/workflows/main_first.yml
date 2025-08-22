@@ -41,7 +41,7 @@ jobs:
 
       # 5. 创建datasets目录
       - name: Create datasets folder
-        run: mkdir -p datasets
+        run: mkdir -p dataset
 
       # 6. 运行脚本（输出到datasets/YYYYMMDD.csv）
       - name: Run main.py

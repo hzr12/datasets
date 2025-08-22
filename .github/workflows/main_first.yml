@@ -1,56 +1,82 @@
-name: 单列车数据库
+name: Daily CSV Export (UTC+8 15:00)
 on:
   schedule:
     - cron: '0 7 * * *'  # UTC 07:00 = UTC+8 15:00
-  workflow_dispatch:    # 支持手动触发
+  workflow_dispatch:      # 支持手动触发
 
 jobs:
   generate-csv:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 必须赋予写入权限
+      contents: write    # 必须赋予写入权限
 
     steps:
       # 1. 检出代码
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整提交历史
 
-      # 2. 设置Python环境并缓存整个环境
+      # 2. 设置Python环境
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: 'pip'  # 自动缓存pip依赖
+          cache: 'pip'    # 启用pip缓存
 
-      # 3. 缓存整个Python环境（包括site-packages）
-      - name: Cache Python env
+      # 3. 缓存整个Python环境
+      - name: Cache Python environment
         uses: actions/cache@v3
+        id: cache-python
         with:
           path: |
             ~/.cache/pip
             /opt/hostedtoolcache/Python/3.11*/x64/lib/python3.11/site-packages
-          key: ${{ runner.os }}-python-3.11-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}-${{ hashFiles('main_first.py') }}
           restore-keys: |
-            ${{ runner.os }}-python-3.11-
+            ${{ runner.os }}-python-
 
-      # 4. 安装依赖
+      # 4. 安装依赖（仅在缓存未命中时执行）
       - name: Install dependencies
+        if: steps.cache-python.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
 
-      # 5. 创建datasets目录
-      - name: Create datasets folder
+      # 5. 创建dataset目录
+      - name: Create dataset folder
         run: mkdir -p dataset
 
-      # 6. 运行脚本（输出到datasets/YYYYMMDD.csv）
-      - name: Run main.py
+      # 6. 运行main_first.py脚本
+      - name: Run main_first.py
         run: python main_first.py
 
-      # 7. 强制提交所有变更
-      - name: Force Commit to datasets/
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Auto-Update: 2025_G5003.csv"
-          branch: main
-          file_pattern: 'dataset/*'
+      # 7. 配置Git用户信息
+      - name: Setup Git config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # 8. 自动提交生成的CSV文件到dataset目录
+      - name: Commit and push CSV file
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 获取当前日期格式的文件名
+          CSV_FILE="dataset/$(date -u +'%Y%m%d')_G5003.csv"
+          
+          # 检查文件是否存在
+          if [ -f "$CSV_FILE" ]; then
+            git add "$CSV_FILE"
+            git commit -m "Auto-Update: $(date -u +'%Y%m%d')_G5003.csv"
+            git push https://$GH_TOKEN@github.com/${{ github.repository }}.git main
+            echo "✅ CSV文件已提交: $CSV_FILE"
+          else
+            echo "❌ 文件未生成: $CSV_FILE"
+            echo "检查main_first.py是否正确输出到dataset/目录"
+            echo "当前目录文件列表:"
+            ls -la dataset/ || echo "dataset目录不存在"
+            exit 1
+          fi

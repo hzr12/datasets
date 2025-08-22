@@ -54,4 +54,4 @@ jobs:
           commit_message: "Auto-Update: 2025_G5003.csv"
           skip_dirty_check: true  # 强制提交
           branch: main
-          file_pattern: 'datasets/*'
+          file_pattern: 'dataset/*'

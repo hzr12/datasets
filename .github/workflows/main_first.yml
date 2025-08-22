@@ -1,4 +1,4 @@
-name: 数据库
+name: 单列车数据库
 on:
   schedule:
     - cron: '0 7 * * *'  # UTC 07:00 = UTC+8 15:00
@@ -51,7 +51,7 @@ jobs:
       - name: Force Commit to datasets/
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-Update: %Y%m%d.csv"
+          commit_message: "Auto-Update: 2025_G5003.csv"
           skip_dirty_check: true  # 强制提交
           branch: main
           file_pattern: 'datasets/*'

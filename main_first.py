@@ -3,7 +3,7 @@ import datetime
 import time
 import pandas as pd
 
-trainNumbers = ['G5003']
+trainNumbers = ['G339']
 result_lists = []
 headers = {
     'Host': 'rail.moefactory.com',

@@ -14,8 +14,8 @@ headers = {
 url = 'https://rail.moefactory.com/api/trainNumber/query'
 time_url = 'https://rail.moefactory.com/api/trainDetails/queryTrainDelayDetails'
 def get_raw_date(i=1):
-    raw_date = datetime.date.today().strftime("%Y%m%d")
-    return int(raw_date) - i
+    target_date = datetime.date.today() - datetime.timedelta(days=i)
+    return int(target_date.strftime("%Y%m%d"))
 def format_date(date):
     date_str = str(date)
     date_obj = datetime.datetime.strptime(date_str, "%Y%m%d") #将YYYYMMDD格式转换为YYYY-MM-DD

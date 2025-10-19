@@ -38,7 +38,6 @@ jobs:
 
       # 4. 安装依赖（仅在缓存未命中时执行）
       - name: Install dependencies
-        if: steps.cache-python.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
           if [ -f "requirements.txt" ]; then

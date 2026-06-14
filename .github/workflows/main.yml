@@ -13,20 +13,20 @@ jobs:
     steps:
       # 1. 检出代码
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0  # 获取完整提交历史
 
       # 2. 设置Python环境
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: 'pip'    # 启用pip缓存
 
       # 3. 缓存整个Python环境
       - name: Cache Python environment
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         id: cache-python
         with:
           path: |
